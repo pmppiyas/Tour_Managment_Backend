@@ -9,9 +9,14 @@ const port = envVars.PORT;
 
 const startServer = async () => {
   try {
-    await mongoose.connect(`${envVars.DB_URL}`);
-
-    console.log("Connected to Database");
+    await mongoose
+      .connect(`${envVars.DB_URL}`)
+      .then(() => {
+        console.log("Connected to Database");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
     server = app.listen(port, () => {
       console.log(`Server is running in port ${port}`);
