@@ -1,29 +1,16 @@
-import { Request, Response } from "express";
-import User from "./user.model";
+import { Request, Response, NextFunction } from "express";
+import { UserServices } from "./user.service";
 
-const createUser = async (req: Request, res: Response) => {
+const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, email } = req.body;
-
-    const user = await User.create({
-      name,
-      email,
-    });
+    const user = await UserServices.createUser(req.body);
     res.status(201).send({
       success: true,
       message: "User created successfully",
       user,
     });
   } catch (error: unknown) {
-    let errorMessage = "An unknown error occurred.";
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    res.status(400).json({
-      success: false,
-      message: "Create user unsuccessfull from server.",
-      error: errorMessage,
-    });
+    next(error);
   }
 };
 
