@@ -1,6 +1,7 @@
 import express, { Response, Request } from "express";
 import cors from "cors";
 import router from "./app/Routes";
+import httpStatus from "http-status-codes";
 import { globalErrorHandler } from "./app/Middlewares/globalErrorHandler";
 import { notFound } from "./app/Middlewares/not_found";
 
@@ -11,7 +12,7 @@ app.use(cors());
 app.use("/api/v1/", router);
 
 app.get("/", async (req: Request, res: Response) => {
-  res.status(200).send({
+  res.status(httpStatus.OK).send({
     success: true,
     message: "Hello, Welcome to your server.",
   });
