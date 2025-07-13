@@ -10,7 +10,7 @@ export const globalErrorHandler: ErrorRequestHandler = (
   next
 ) => {
   let statusCode = 500;
-  let message = `Something went wrong!`;
+  let message = `Something went wrong !`;
 
   if (error instanceof AppError) {
     statusCode = error.statusCode;
