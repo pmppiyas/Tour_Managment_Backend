@@ -49,11 +49,7 @@ const updateUser = async (
   payload: Partial<IUser>,
   decodedToken: JwtPayload
 ) => {
-  // name, phone, password, address
-  // password re hashing
-  // Only admin can update Role, isDeleted
-  //Stop Promoting to super admin
-
+  
   if (
     userId !== decodedToken.userId &&
     decodedToken.role !== Role.ADMIN &&

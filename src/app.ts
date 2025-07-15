@@ -2,13 +2,14 @@ import express, { Response, Request } from "express";
 import cors from "cors";
 import router from "./app/Routes";
 import httpStatus from "http-status-codes";
+import cookieParser from "cookie-parser";
 import { globalErrorHandler } from "./app/Middlewares/globalErrorHandler";
 import { notFound } from "./app/Middlewares/not_found";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-
+app.use(cookieParser());
 app.use("/api/v1/", router);
 
 app.get("/", async (req: Request, res: Response) => {
