@@ -5,6 +5,7 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import { setAuthCookie } from "../../utils/setCookie";
+import { clearAuthCookies } from "../../utils/clearCookie";
 
 const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -33,13 +34,25 @@ const getNewAccessToken = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Token Genarete Successfully",
+      message: "New Token Genarete Successfully",
       data: tokenInfo,
     });
   }
 );
 
+const logout = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    clearAuthCookies(res);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Logout successfully",
+      data: null,
+    });
+  }
+);
 export const AuthControllers = {
   credentialsLogin,
   getNewAccessToken,
+  logout,
 };
