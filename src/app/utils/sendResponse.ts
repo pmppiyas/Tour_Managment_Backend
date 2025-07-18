@@ -12,6 +12,7 @@ interface TResponse<T> {
 }
 
 const sendResponse = <T>(res: Response, data: TResponse<T>) => {
+  if (res.headersSent) return;
   res.status(data.statusCode).json({
     success: data.success,
     message: data.message,
