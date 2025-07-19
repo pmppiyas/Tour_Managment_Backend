@@ -1,3 +1,4 @@
+import passport from "passport";
 import { JwtPayload } from "jsonwebtoken";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import httpStatus from "http-status-codes";
@@ -9,21 +10,36 @@ import { setAuthCookie } from "../../utils/setCookie";
 import { clearAuthCookies } from "../../utils/clearCookie";
 import { createUserTokens } from "../../utils/userTokens";
 import { AppError } from "../../Error/appError";
-import httpStatus from "http-status-codes";
 import { envVars } from "../../../config/env";
 
 const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const loginInfo = await AuthServices.credentialsLogin(req.body);
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+      if (err) {
+        return next(new AppError(httpStatus.METHOD_FAILURE, err));
+      }
 
-    setAuthCookie(res, loginInfo);
+      if (!user) {
+        return next(new AppError(httpStatus.NOT_FOUND, info.message));
+      }
 
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "User Login Successfully",
-      data: loginInfo,
-    });
+      const userToken = createUserTokens(user); 
+
+      setAuthCookie(res, info?.message);
+
+      const { password: _password, ...rest } = user.toObject();
+
+      sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User Login Successfully",
+        data: {
+          accessToken: userToken.accessToken,
+          refreshToken: userToken.refreshToken,
+          user: rest,
+        },
+      });
+    })(req, res, next);
   }
 );
 

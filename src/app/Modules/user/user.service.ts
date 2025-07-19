@@ -20,7 +20,7 @@ const createUser = async (payload: Partial<IUser>) => {
   );
 
   const authProvider: IAuthProviders = {
-    provider: "google",
+    provider: "credentials",
     providerId: email as string,
   };
 
@@ -49,7 +49,6 @@ const updateUser = async (
   payload: Partial<IUser>,
   decodedToken: JwtPayload
 ) => {
-  
   if (
     userId !== decodedToken.userId &&
     decodedToken.role !== Role.ADMIN &&

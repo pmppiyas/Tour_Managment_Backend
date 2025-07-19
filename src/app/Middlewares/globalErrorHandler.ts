@@ -9,6 +9,8 @@ export const globalErrorHandler: ErrorRequestHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next
 ) => {
+
+
   let statusCode = 500;
   let message = `Something went wrong !`;
 
