@@ -1,3 +1,4 @@
+import { JwtPayload } from "jsonwebtoken";
 import httpStatus from "http-status-codes";
 import { Request, Response, NextFunction } from "express";
 import { UserServices } from "./user.service";
@@ -30,7 +31,28 @@ const getAllUsers = catchAsync(
   }
 );
 
+const updateUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.id;
+
+    const verifiedToken = req.user;
+    const user = await UserServices.updateUser(
+      userId,
+      req.body,
+      verifiedToken as JwtPayload
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User updated successfully",
+      data: user,
+    });
+  }
+);
+
 export const UserControllers = {
   createUser,
   getAllUsers,
+  updateUser,
 };
