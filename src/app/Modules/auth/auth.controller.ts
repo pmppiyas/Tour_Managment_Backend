@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import passport from "passport";
 import { JwtPayload } from "jsonwebtoken";
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import httpStatus from "http-status-codes";
 import { Request, Response, NextFunction } from "express";
 import catchAsync from "../../utils/catchAsync";
@@ -23,7 +23,7 @@ const credentialsLogin = catchAsync(
         return next(new AppError(httpStatus.NOT_FOUND, info.message));
       }
 
-      const userToken = createUserTokens(user); 
+      const userToken = createUserTokens(user);
 
       setAuthCookie(res, info?.message);
 

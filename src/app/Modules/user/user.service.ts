@@ -10,10 +10,11 @@ import { hashingPassword } from "../../utils/hashingPassword";
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
 
-  const ifUserExist = await User.findOne({ email });
-  if (ifUserExist) {
-    throw new AppError(httpStatus.BAD_REQUEST, "User Already Exist");
-  }
+  // const ifUserExist = await User.findOne({ email });
+
+  // if (ifUserExist) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, "User Already Exist");
+  // }
   const hashPassword = await bcryptjs.hash(
     password as string,
     Number(envVars.DCRYPT_SALT_ROUND)
