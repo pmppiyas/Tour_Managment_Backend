@@ -15,6 +15,10 @@ export const globalErrorHandler: ErrorRequestHandler = (
   res,
   next
 ) => {
+  if (envVars.NODE_ENV === "development") {
+    console.log(error);
+  }
+
   let statusCode = 500;
   let message = `Something went wrong !`;
 
@@ -52,7 +56,12 @@ export const globalErrorHandler: ErrorRequestHandler = (
   res.status(statusCode).json({
     success: false,
     message,
-    error: errorSources.length > 0 ? errorSources : error,
+    error:
+      envVars.NODE_ENV === "development"
+        ? errorSources.length > 0
+          ? errorSources
+          : error
+        : null,
     stack: envVars.NODE_ENV === "development" ? error.stack : null,
   });
 };

@@ -10,6 +10,8 @@ const errMode: any = [];
 let missing: any = [];
 
 export const handleDuplicateError = (error: any) => {
+  errorSources = [];
+  missing = [];
   const match = error.message.match(/dup key:\s*{ (\w+): "(.*?)" }/);
   if (match) {
     const field = match[1];
@@ -52,17 +54,17 @@ export const handleZodValidatonError = (error: any) => {
     };
   } else {
     return {
-      message: `${
-        errorSources[0].message.charAt(0).toUpperCase() +
-        errorSources[0].message.slice(1)
-      }`,
+      message: `Wrong value in ${missing.map(
+        (item: string) => item.charAt(0).toUpperCase() + item.slice(1)
+      )}`,
     };
   }
 };
 
 export const validationError = (error: any) => {
   const errors = Object.values(error.errors);
-
+  errorSources = [];
+  missing = [];
   errors.forEach((errObj: any) =>
     errorSources.push({ path: errObj.path, message: errObj.message })
   );
