@@ -5,8 +5,15 @@ const divisionSchema = new Schema<IDivision>(
   {
     name: { type: String, required: true, unique: true },
     slug: { type: String, required: true, unique: true },
-    thumbnail: { type: String },
-    description: { type: String },
+    thumbnail: {
+      type: [String],
+      default: [],
+    },
+
+    description: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
