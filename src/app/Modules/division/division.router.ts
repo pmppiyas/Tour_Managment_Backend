@@ -3,7 +3,10 @@ import { checkAuth } from "../../Middlewares/checkAuth";
 import { Role } from "../user/user.interface";
 import { DivisionController } from "./division.controller";
 import { validateRequest } from "../../Middlewares/validateRequest";
-import { createDivisionZodSchema } from "./division.validation";
+import {
+  createDivisionZodSchema,
+  updateDivisionZodSchema,
+} from "./division.validation";
 
 const router = Router();
 
@@ -24,6 +27,14 @@ router.get(
   "/:slug",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   DivisionController.getSingleDivision
+);
+
+router.patch(
+  "/:id",
+  validateRequest(updateDivisionZodSchema),
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+
+  DivisionController.upadteDivision
 );
 
 export const DivisonRoutes = router;

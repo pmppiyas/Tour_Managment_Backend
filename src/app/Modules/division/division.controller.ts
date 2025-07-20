@@ -45,8 +45,22 @@ const getSingleDivision = catchAsync(
   }
 );
 
+const upadteDivision = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const result = await DivisionServices.updateDivision(id, req.body);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Division create successfully",
+      data: result,
+    });
+  }
+);
+
 export const DivisionController = {
   createDivision,
   getAllDivisions,
   getSingleDivision,
+  upadteDivision,
 };
