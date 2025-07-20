@@ -26,6 +26,19 @@ const createUser = async (payload: Partial<IDivision>) => {
   return division;
 };
 
+const getAllDivisions = async () => {
+  const divisions = await Division.find({});
+  const totalDivision = await Division.countDocuments();
+
+  return {
+    data: divisions,
+    meta: {
+      total: totalDivision,
+    },
+  };
+};
+
 export const DivisionServices = {
   createUser,
+  getAllDivisions,
 };

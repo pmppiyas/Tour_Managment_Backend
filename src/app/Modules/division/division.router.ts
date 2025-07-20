@@ -14,4 +14,6 @@ router.post(
   DivisionController.createDivision
 );
 
+router.get("/", DivisionController.getAllDivisions);
+
 export const DivisonRoutes = router;
