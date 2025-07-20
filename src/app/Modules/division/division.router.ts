@@ -14,6 +14,16 @@ router.post(
   DivisionController.createDivision
 );
 
-router.get("/", DivisionController.getAllDivisions);
+router.get(
+  "/",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  DivisionController.getAllDivisions
+);
+
+router.get(
+  "/:slug",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  DivisionController.getSingleDivision
+);
 
 export const DivisonRoutes = router;

@@ -31,7 +31,22 @@ const getAllDivisions = catchAsync(
   }
 );
 
+const getSingleDivision = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const slug = req.params.slug;
+    const result = DivisionServices.getSingleDivision(slug);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Division Retrieved",
+      data: (await result).data,
+    });
+  }
+);
+
 export const DivisionController = {
   createDivision,
   getAllDivisions,
+  getSingleDivision,
 };
