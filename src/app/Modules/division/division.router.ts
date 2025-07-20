@@ -33,8 +33,13 @@ router.patch(
   "/:id",
   validateRequest(updateDivisionZodSchema),
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-
   DivisionController.upadteDivision
+);
+
+router.delete(
+  "/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  DivisionController.deleteDivision
 );
 
 export const DivisonRoutes = router;

@@ -68,9 +68,24 @@ const updateDivision = async (id: string, payload: Partial<IDivision>) => {
   return updatedDivision;
 };
 
+const deleteDivision = async (id: string) => {
+  const isExist = await Division.findById(id);
+  if (!isExist) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Division is not found by this ID!"
+    );
+  }
+
+  await Division.findByIdAndDelete(id);
+
+  return null;
+};
+
 export const DivisionServices = {
   createUser,
   getAllDivisions,
   getSingleDivision,
   updateDivision,
+  deleteDivision,
 };
