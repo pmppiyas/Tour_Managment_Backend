@@ -1,6 +1,8 @@
 import { excludeField, QueryBuilder } from "../../utils/QueryBuilder";
-import { ITour } from "./tour.interface";
-import { Tour } from "./tour.model";
+import { ITour, ITourType } from "./tour.interface";
+import { Tour, TourType } from "./tour.model";
+
+///-----Tour-----////
 
 const createTour = async (payload: ITour) => {
   const isExistTour = await Tour.findOne({ name: payload.name });
@@ -86,10 +88,38 @@ const tourDelete = async (id: string) => {
   return null;
 };
 
+///-----Tour Type-----////
+
+const createTourType = async (payload: ITourType) => {
+  const isExistTourType = await TourType.findOne({ name: payload.name });
+  if (isExistTourType) {
+    throw new Error("A tour type with this name already exists.");
+  }
+
+  const tourType = await TourType.create(payload);
+  return tourType;
+};
+
+const updateTourType = async (id: string, payload: Partial<ITourType>) => {
+  const isExistTourType = await TourType.findById(id);
+  if (!isExistTourType) {
+    throw new Error("Tour type not found.");
+  }
+  const updatedTourType = await TourType.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+  return updatedTourType;
+};
 export const TourServices = {
   createTour,
   getAllTour,
   getSingleTour,
   updateTour,
   tourDelete,
+
+  // --------//
+
+  createTourType,
+  updateTourType,
 };

@@ -23,3 +23,9 @@ export const createTourZodObject = z.object({
   division: z.string({ required_error: "Divistion name is required" }),
   tourType: z.string({ required_error: "TourType is required" }),
 });
+
+export const tourTypeZodObject = z.object({
+  name: z
+    .string({ required_error: "Tour type name is required." })
+    .min(2, "Minimum two characters needed."),
+});

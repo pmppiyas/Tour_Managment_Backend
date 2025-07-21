@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { TourController } from "./tour.controller";
 import { validateRequest } from "../../Middlewares/validateRequest";
-import { createTourZodObject } from "./tour.validation";
+import { createTourZodObject, tourTypeZodObject } from "./tour.validation";
 import { checkAuth } from "../../Middlewares/checkAuth";
 import { Role } from "../user/user.interface";
 
@@ -42,4 +42,17 @@ router.delete(
 
 ///-----Tour Type ----------///
 
+router.post(
+  "/create-tour-type",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  validateRequest(tourTypeZodObject),
+  TourController.createTourType
+);
+
+router.patch(
+  "/tour-type/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  validateRequest(tourTypeZodObject.partial()),
+  TourController.updateTourType
+);
 export const TourRoutes = router;
