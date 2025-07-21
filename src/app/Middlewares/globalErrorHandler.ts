@@ -25,6 +25,8 @@ export const globalErrorHandler: ErrorRequestHandler = (
   //Duplicate Error
   if (error.code === 11000) {
     const dupFunc = handleDuplicateError(error);
+    // console.log("Duplication Error", dupFunc.message);
+    // console.log("Duplication Error", dupFunc.statusCode);
     statusCode = dupFunc.statusCode;
     message = dupFunc.message;
   }

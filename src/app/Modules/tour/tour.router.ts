@@ -21,11 +21,11 @@ router.get(
   TourController.getAllTour
 );
 
-router.get(
-  "/:id",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  TourController.getSingleTour
-);
+// router.get(
+//   "/:id",
+//   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+//   TourController.getSingleTour
+// );
 
 router.patch(
   "/:id",
@@ -50,7 +50,7 @@ router.post(
 );
 
 router.patch(
-  "/tour-type/:id",
+  "/tour-types/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   validateRequest(tourTypeZodObject.partial()),
   TourController.updateTourType
@@ -63,7 +63,7 @@ router.get(
 );
 
 router.delete(
-  "/tour-type/:id",
+  "/tour-types/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   TourController.deleteTourType
 );

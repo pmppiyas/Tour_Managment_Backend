@@ -10,17 +10,6 @@ const createTour = async (payload: ITour) => {
     throw new Error("A tour with this name already exists.");
   }
 
-  if (payload.name) {
-    const baseSlug = payload.name.toLowerCase().split(" ").join("-");
-    let slug = `${baseSlug}`;
-
-    let counter = 0;
-    while (await Tour.exists({ slug })) {
-      slug = `${slug}-${counter++}`;
-    }
-
-    payload.slug = slug;
-  }
   const tour = await Tour.create(payload);
   return tour;
 };
@@ -57,18 +46,6 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
   const isExistTour = await Tour.findById(id);
   if (!isExistTour) {
     throw new Error("Tour not found.");
-  }
-
-  if (payload.name) {
-    const baseSlug = payload.name.toLowerCase().split(" ").join("-");
-    let slug = `${baseSlug}`;
-
-    let counter = 0;
-    while (await Tour.exists({ slug })) {
-      slug = `${slug}-${counter++}`;
-    }
-
-    payload.slug = slug;
   }
 
   const updatedTour = await Tour.findByIdAndUpdate(id, payload, {

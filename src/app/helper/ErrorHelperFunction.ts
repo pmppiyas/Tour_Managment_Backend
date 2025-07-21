@@ -25,7 +25,6 @@ export const handleDuplicateError = (error: any) => {
   if (keyValue) {
     const field = Object.keys(keyValue)[0];
     const value = keyValue[field];
-
     return {
       message: `Duplicate ${field} "${value}" already exists`,
       statusCode: httpStatus.METHOD_FAILURE,

@@ -6,7 +6,7 @@ import { DivisionServices } from "./division.services";
 
 const createDivision = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const division = await DivisionServices.createUser(req.body);
+    const division = await DivisionServices.createDivision(req.body);
 
     sendResponse(res, {
       success: true,

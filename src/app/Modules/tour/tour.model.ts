@@ -16,7 +16,7 @@ export const TourType = mongoose.model<ITourType>("TourType", tourTypeSchema);
 const tourSchema = new Schema<ITour>(
   {
     name: { type: String, required: true },
-    slug: { type: String, required: true, unique: true },
+    slug: { type: String, unique: true },
     description: { type: [String], default: [] },
     images: { type: [String], default: [] },
     location: { type: String },
@@ -45,5 +45,37 @@ const tourSchema = new Schema<ITour>(
     versionKey: false,
   }
 );
+
+tourSchema.pre("save", async function (next) {
+  if (this.isModified("name")) {
+    const baseSlug = this.name.toLowerCase().split(" ").join("-");
+    let slug = `${baseSlug}-division`;
+
+    let counter = 0;
+    while (await Tour.exists({ slug })) {
+      slug = `${slug}-${counter++}`;
+    }
+
+    this.slug = slug;
+  }
+  next();
+});
+
+tourSchema.pre("findOneAndUpdate", async function (next) {
+  const division = this.getUpdate() as Partial<ITour>;
+  if (division.name) {
+    const baseSlug = division.name.toLowerCase().split(" ").join("-");
+    let slug = `${baseSlug}-division`;
+
+    let counter = 0;
+    while (await Tour.exists({ slug })) {
+      slug = `${slug}-${counter++}`;
+    }
+
+    this.set({ slug });
+  }
+
+  next();
+});
 
 export const Tour = mongoose.model<ITour>("Tour", tourSchema);
