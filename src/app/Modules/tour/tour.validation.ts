@@ -5,7 +5,7 @@ export const createTourZodObject = z.object({
     .string({ required_error: "Tour name is required." })
     .min(2, "Minimum two charecter needed."),
   slug: z.string().optional(),
-  description: z.string().optional(),
+  description: z.array(z.string()).optional().default([]),
   images: z.array(z.string()).optional().default([]),
   location: z.string().optional(),
   costFrom: z.number().optional(),

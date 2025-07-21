@@ -2,6 +2,8 @@ import { AppError } from "../../Error/appError";
 import { IDivision } from "./division.interfaces";
 import { Division } from "./division.model";
 import httpStatus from "http-status-codes";
+
+
 const createUser = async (payload: Partial<IDivision>) => {
   const isExist = await Division.findOne({ name: payload.name });
   if (isExist) {

@@ -7,7 +7,7 @@ export interface ITourType {
 export interface ITour {
   name: string;
   slug?: string;
-  description?: string;
+  description?: string[];
   images?: string[];
   location?: string;
   costFrom?: number;
