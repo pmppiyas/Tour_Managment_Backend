@@ -43,6 +43,14 @@ const getAllTour = async (query: Record<string, string>) => {
   };
 };
 
+const getSingleTour = async (id: string) => {
+  const tour = await Tour.findById(id);
+  if (!tour) {
+    throw new Error("Tour not found.");
+  }
+  return tour;
+};
+
 const updateTour = async (id: string, payload: Partial<ITour>) => {
   const isExistTour = await Tour.findById(id);
   if (!isExistTour) {
@@ -81,6 +89,7 @@ const tourDelete = async (id: string) => {
 export const TourServices = {
   createTour,
   getAllTour,
+  getSingleTour,
   updateTour,
   tourDelete,
 };

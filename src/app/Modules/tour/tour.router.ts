@@ -21,6 +21,12 @@ router.get(
   TourController.getAllTour
 );
 
+router.get(
+  "/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  TourController.getSingleTour
+);
+
 router.patch(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
@@ -33,5 +39,7 @@ router.delete(
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   TourController.deleteTour
 );
+
+///-----Tour Type ----------///
 
 export const TourRoutes = router;

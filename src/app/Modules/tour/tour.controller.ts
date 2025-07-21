@@ -29,6 +29,18 @@ const getAllTour = catchAsync(
   }
 );
 
+const getSingleTour = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await TourServices.getSingleTour(req.params.id);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Single tour retrieved successfully.",
+      data: result,
+    });
+  }
+);
 const updateTour = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const result = await TourServices.updateTour(req.params.id, req.body);
@@ -54,9 +66,11 @@ const deleteTour = catchAsync(
     });
   }
 );
+
 export const TourController = {
   createTour,
   getAllTour,
+  getSingleTour,
   updateTour,
   deleteTour,
 };
