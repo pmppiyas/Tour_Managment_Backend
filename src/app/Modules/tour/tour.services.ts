@@ -17,10 +17,12 @@ const createTour = async (payload: ITour) => {
 };
 
 const getAllTour = async (query: Record<string, string>) => {
-  console.log("Query:", query);
   const searchTerm = query.searchTerm || "";
   const sort = query.sort || "-createdAt";
   const fields = query.fields?.split(",").join(" ") || "";
+  const page = query.page || "1";
+  const limit = query.limit || "10";
+  const skip = (Number(page) - 1) * Number(limit);
 
   const filter: any = {};
 
@@ -32,14 +34,33 @@ const getAllTour = async (query: Record<string, string>) => {
   if (query.location) {
     filter.location = { $regex: query.location, $options: "i" };
   }
-  const tours = await Tour.find(filter).sort(sort).select(fields);
+  const tours = await Tour.find(filter)
+    .sort(sort)
+    .select(fields)
+    .skip(skip)
+    .limit(Number(limit));
 
   if (!tours || tours.length === 0) {
     throw new AppError(httpsStatus.NOT_FOUND, "No tours found.");
   }
+
+  const totalDocuments = await Tour.countDocuments();
+  const totalIndex = tours.length;
+  if (totalIndex === 0) {
+    throw new AppError(httpsStatus.NOT_FOUND, "No tours found.");
+  }
+  const totalPage = Math.ceil(totalDocuments / Number(limit));
+  const meta = {
+    totalDocuments,
+    totalIndex,
+    totalPage,
+    page: Number(page),
+    limit: Number(limit),
+  };
   return {
     tours,
     query,
+    meta,
   };
 };
 
