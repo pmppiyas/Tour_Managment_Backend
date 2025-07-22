@@ -1,8 +1,10 @@
+import { Query } from "mongoose";
 import httpsStatus from "http-status-codes";
 import { AppError } from "../../Error/appError";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 import { tourSearchableFields } from "./tour.constant";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
 ///-----Tour-----////
 
@@ -16,50 +18,29 @@ const createTour = async (payload: ITour) => {
   return tour;
 };
 
+// Quey Builder for Tour
+
 const getAllTour = async (query: Record<string, string>) => {
-  const searchTerm = query.searchTerm || "";
-  const sort = query.sort || "-createdAt";
-  const fields = query.fields?.split(",").join(" ") || "";
-  const page = query.page || "1";
-  const limit = query.limit || "10";
-  const skip = (Number(page) - 1) * Number(limit);
+  const queryBuilder = new QueryBuilder(Tour.find(), query);
 
-  const filter: any = {};
+  const tours = await queryBuilder
+    .filter()
+    .search(tourSearchableFields)
+    .sort()
+    .fields()
+    .paginate();
 
-  if (searchTerm) {
-    filter.$or = tourSearchableFields.map((field) => ({
-      [field]: { $regex: searchTerm, $options: "i" },
-    }));
-  }
-  if (query.location) {
-    filter.location = { $regex: query.location, $options: "i" };
-  }
-  const tours = await Tour.find(filter)
-    .sort(sort)
-    .select(fields)
-    .skip(skip)
-    .limit(Number(limit));
+  const [data, meta] = await Promise.all([
+    tours.build(),
+    queryBuilder.getMeta(),
+  ]);
 
-  if (!tours || tours.length === 0) {
+  if (!data || data.length === 0) {
     throw new AppError(httpsStatus.NOT_FOUND, "No tours found.");
   }
 
-  const totalDocuments = await Tour.countDocuments();
-  const totalIndex = tours.length;
-  if (totalIndex === 0) {
-    throw new AppError(httpsStatus.NOT_FOUND, "No tours found.");
-  }
-  const totalPage = Math.ceil(totalDocuments / Number(limit));
-  const meta = {
-    totalDocuments,
-    totalIndex,
-    totalPage,
-    page: Number(page),
-    limit: Number(limit),
-  };
   return {
-    tours,
-    query,
+    tours: data,
     meta,
   };
 };

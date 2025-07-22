@@ -1,11 +1,9 @@
 import { Query } from "mongoose";
-
-export const excludeField = ["searchTerm", "sort", "fields", "page", "limit"];
+import { excludeFilterFields } from "../Modules/tour/tour.constant";
 
 export class QueryBuilder<T> {
   public modelQuery: Query<T[], T>;
   public readonly query: Record<string, string>;
-
   constructor(modelQuery: Query<T[], T>, query: Record<string, string>) {
     this.modelQuery = modelQuery;
     this.query = query;
@@ -14,30 +12,26 @@ export class QueryBuilder<T> {
   filter(): this {
     const filter = { ...this.query };
 
-    for (const field of excludeField) {
+    for (const field of excludeFilterFields) {
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete filter[field];
     }
 
-    this.modelQuery = this.modelQuery.find(filter); // Tour.find().find(filter)
-
+    this.modelQuery = this.modelQuery.find(filter);
     return this;
   }
 
-  search(searchableField: string[]): this {
+  search(searchableFields: string[]): this {
     const searchTerm = this.query.searchTerm;
-    if (searchTerm) {
-      const searchQuery = {
-        $or: searchableField.map((field) => ({
-          [field]: { $regex: searchTerm, $options: "i" },
-        })),
-      };
 
-      this.modelQuery = this.modelQuery.find({
-        ...this.modelQuery.getQuery(),
-        ...searchQuery,
-      });
+    if (searchTerm) {
+      const searchConditions = searchableFields.map((field) => ({
+        [field]: { $regex: searchTerm, $options: "i" },
+      }));
+
+      this.modelQuery = this.modelQuery.find({ $or: searchConditions });
     }
+
     return this;
   }
 
@@ -48,6 +42,7 @@ export class QueryBuilder<T> {
 
     return this;
   }
+
   fields(): this {
     const fields = this.query.fields?.split(",").join(" ") || "";
 
@@ -55,6 +50,7 @@ export class QueryBuilder<T> {
 
     return this;
   }
+
   paginate(): this {
     const page = Number(this.query.page) || 1;
     const limit = Number(this.query.limit) || 10;
@@ -65,18 +61,33 @@ export class QueryBuilder<T> {
     return this;
   }
 
-  build() {
+  build(): Query<T[], T> {
     return this.modelQuery;
   }
 
-  async getMeta() {
+  async getMeta(): Promise<{
+    page: number;
+    limit: number;
+    total: number;
+    // totalIndex: number;
+    totalPage: number;
+  }> {
     const totalDocuments = await this.modelQuery.model.countDocuments();
+
+    // Total documents on current page (after pagination)
+    // const paginatedDocs = await this.modelQuery;
+    // const totalIndex = paginatedDocs.length;
 
     const page = Number(this.query.page) || 1;
     const limit = Number(this.query.limit) || 10;
-
     const totalPage = Math.ceil(totalDocuments / limit);
 
-    return { page, limit, total: totalDocuments, totalPage };
+    return {
+      // totalIndex,
+      page,
+      limit,
+      total: totalDocuments,
+      totalPage,
+    };
   }
 }
