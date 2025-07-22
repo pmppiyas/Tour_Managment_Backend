@@ -1,6 +1,8 @@
-import { excludeField, QueryBuilder } from "../../utils/QueryBuilder";
+import httpsStatus from "http-status-codes";
+import { AppError } from "../../Error/appError";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
+import { tourSearchableFields } from "./tour.constant";
 
 ///-----Tour-----////
 
@@ -15,22 +17,29 @@ const createTour = async (payload: ITour) => {
 };
 
 const getAllTour = async (query: Record<string, string>) => {
-  const queryBuilder = new QueryBuilder(Tour.find(), query);
-  console.log(query);
-  const tours = queryBuilder
-    .search(excludeField)
-    .filter()
-    .sort()
-    .fields()
-    .paginate();
+  console.log("Query:", query);
+  const searchTerm = query.searchTerm || "";
+  const sort = query.sort || "-createdAt";
+  const fields = query.fields?.split(",").join(" ") || "";
 
-  const [data, meta] = await Promise.all([
-    tours.build(),
-    queryBuilder.getMeta(),
-  ]);
+  const filter: any = {};
+
+  if (searchTerm) {
+    filter.$or = tourSearchableFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: "i" },
+    }));
+  }
+  if (query.location) {
+    filter.location = { $regex: query.location, $options: "i" };
+  }
+  const tours = await Tour.find(filter).sort(sort).select(fields);
+
+  if (!tours || tours.length === 0) {
+    throw new AppError(httpsStatus.NOT_FOUND, "No tours found.");
+  }
   return {
-    data,
-    meta,
+    tours,
+    query,
   };
 };
 

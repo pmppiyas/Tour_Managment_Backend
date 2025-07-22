@@ -49,7 +49,7 @@ const tourSchema = new Schema<ITour>(
 tourSchema.pre("save", async function (next) {
   if (this.isModified("name")) {
     const baseSlug = this.name.toLowerCase().split(" ").join("-");
-    let slug = `${baseSlug}-division`;
+    let slug = `${baseSlug}`;
 
     let counter = 0;
     while (await Tour.exists({ slug })) {
@@ -65,7 +65,7 @@ tourSchema.pre("findOneAndUpdate", async function (next) {
   const division = this.getUpdate() as Partial<ITour>;
   if (division.name) {
     const baseSlug = division.name.toLowerCase().split(" ").join("-");
-    let slug = `${baseSlug}-division`;
+    let slug = `${baseSlug}`;
 
     let counter = 0;
     while (await Tour.exists({ slug })) {
