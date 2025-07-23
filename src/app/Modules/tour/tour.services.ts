@@ -1,4 +1,3 @@
-import { Query } from "mongoose";
 import httpsStatus from "http-status-codes";
 import { AppError } from "../../Error/appError";
 import { ITour, ITourType } from "./tour.interface";
