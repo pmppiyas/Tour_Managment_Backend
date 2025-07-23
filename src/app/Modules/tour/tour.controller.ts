@@ -33,7 +33,7 @@ const getAllTour = catchAsync(
 
 const getSingleTour = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await TourServices.getSingleTour(req.params.id);
+    const result = await TourServices.getSingleTour(req.params.slug);
 
     sendResponse(res, {
       statusCode: 200,

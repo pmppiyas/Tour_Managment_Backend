@@ -21,11 +21,11 @@ router.get(
   TourController.getAllTour
 );
 
-// router.get(
-//   "/:id",
-//   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-//   TourController.getSingleTour
-// );
+router.get(
+  "/:slug",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  TourController.getSingleTour
+);
 
 router.patch(
   "/:id",

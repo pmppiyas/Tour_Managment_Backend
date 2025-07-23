@@ -8,6 +8,8 @@ export const createTourZodObject = z.object({
   description: z.array(z.string()).optional().default([]),
   images: z.array(z.string()).optional().default([]),
   location: z.string().optional(),
+  departureLocation: z.string().optional(),
+  arrivalLocation: z.string().optional(),
   costFrom: z.number().optional(),
   startDate: z.string().datetime({ offset: true }).optional(),
   endDate: z.string().datetime({ offset: true }).optional(),

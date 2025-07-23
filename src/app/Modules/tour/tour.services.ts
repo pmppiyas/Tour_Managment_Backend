@@ -45,8 +45,8 @@ const getAllTour = async (query: Record<string, string>) => {
   };
 };
 
-const getSingleTour = async (id: string) => {
-  const tour = await Tour.findById(id);
+const getSingleTour = async (slug: string) => {
+  const tour = await Tour.findOne({ slug });
   if (!tour) {
     throw new Error("Tour not found.");
   }
