@@ -1,9 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ErrorRequestHandler } from "express";
 import { envVars } from "../../config/env";
 import { AppError } from "../Error/appError";
 import httpStatus from "http-status-codes";
+import {
+  errorSources,
+  handleDuplicateError,
+  handleZodValidatonError,
+  validationError,
+} from "../helper/ErrorHelperFunction";
 
 export const globalErrorHandler: ErrorRequestHandler = (
   error,
@@ -11,27 +15,20 @@ export const globalErrorHandler: ErrorRequestHandler = (
   res,
   next
 ) => {
+  if (envVars.NODE_ENV === "development") {
+    console.log(error);
+  }
+
   let statusCode = 500;
   let message = `Something went wrong !`;
 
-  interface errType {
-    path: string;
-    message: string;
-  }
-  const errorSources: errType[] = [];
-  const errMode: any = [];
   //Duplicate Error
   if (error.code === 11000) {
-    const match = error.message.match(/dup key:\s*{ (\w+): "(.*?)" }/);
-    if (match) {
-      const field = match[1];
-      const value = match[2];
-      message = `Duplicate ${field} "${value}" already exists`;
-      statusCode = httpStatus.METHOD_FAILURE;
-    } else {
-      message = "Duplicate value already exists";
-      statusCode = httpStatus.METHOD_FAILURE;
-    }
+    const dupFunc = handleDuplicateError(error);
+    // console.log("Duplication Error", dupFunc.message);
+    // console.log("Duplication Error", dupFunc.statusCode);
+    statusCode = dupFunc.statusCode;
+    message = dupFunc.message;
   }
 
   // Invalid Object ID Error
@@ -41,43 +38,13 @@ export const globalErrorHandler: ErrorRequestHandler = (
 
   //Validator Error
   else if (error.name === "ValidationError") {
-    const errors = Object.values(error.errors);
-
-    errors.forEach((errObj: any) =>
-      errorSources.push({ path: errObj.path, message: errObj.message })
-    );
-
-    message = error.name;
+    validationError(error);
   }
 
   //Zod Error
   if (error.name === "ZodError") {
-    const missing: any = [];
-    const errors = Object.values(error.errors);
-
-    errors.forEach((errObj: any) => {
-      const path = Array.isArray(errObj.path) ? errObj.path[0] : errObj.path;
-
-      errorSources.push({
-        path: path,
-        message: errObj.message,
-      });
-    });
-
-    errorSources.forEach((pb) => missing.push(pb.path));
-
-    errors.forEach((item) => errMode.push(item));
-
-    if (errMode[0].received === "undefined") {
-      message = `${missing.map(
-        (item: string) => item.charAt(0).toUpperCase() + item.slice(1)
-      )} is required`;
-    } else {
-      message = `${
-        errorSources[0].message.charAt(0).toUpperCase() +
-        errorSources[0].message.slice(1)
-      }`;
-    }
+    message = handleZodValidatonError(error).message;
+    statusCode = httpStatus.NOT_ACCEPTABLE;
   }
 
   //
@@ -91,7 +58,12 @@ export const globalErrorHandler: ErrorRequestHandler = (
   res.status(statusCode).json({
     success: false,
     message,
-    error: errorSources.length > 0 ? errorSources : error,
+    error:
+      envVars.NODE_ENV === "development"
+        ? errorSources.length > 0
+          ? errorSources
+          : error
+        : null,
     stack: envVars.NODE_ENV === "development" ? error.stack : null,
   });
 };
