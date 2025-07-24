@@ -16,6 +16,5 @@ export interface IPayment {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   paymentMethod?: any;
   invoiceUrl?: string;
-  paymentDate?: Date;
   status: PaymentStatus;
 }
