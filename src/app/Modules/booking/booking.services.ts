@@ -7,82 +7,114 @@ import Booking from "./booking.model";
 import Payment from "../payment/payment.model";
 import { Tour } from "../tour/tour.model";
 const createBooking = async (payload: IBooking, decodedUser: JwtPayload) => {
-  const user = await User.findById(decodedUser.userId);
+  const session = await Booking.startSession();
+  session.startTransaction();
+  try {
+    const user = await User.findById(decodedUser.userId).session(session);
 
-  if (!user?.phone || !user?.address) {
-    throw new AppError(
-      httpStatus.NOT_FOUND,
-      "Please update your profile with phone and address."
-    );
-  }
-
-  const { tour, guestCount } = payload;
-
-  if (!tour) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Tour ID is required.");
-  }
-
-  if (!guestCount) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Guest count must be at least 1."
-    );
-  }
-
-  const booking = await Booking.create({
-    ...payload,
-    user: user._id,
-  });
-
-  const tourData = await Tour.findById(payload.tour);
-  if (!tourData || !tourData?.costFrom || !tourData?.maxGuest) {
-    throw new AppError(httpStatus.NOT_FOUND, "Something missing about tour.");
-  }
-
-  if (booking.guestCount > tourData?.maxGuest) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      `Guest count exceeds maximum group size of ${tourData.maxGuest}.`
-    );
-  }
-
-  const payment = await Payment.create({
-    user: user._id,
-    booking: booking._id,
-    transactionId: `txn_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-    amount: booking.guestCount * tourData?.costFrom,
-  });
-
-  if (!payment) {
-    throw new AppError(
-      httpStatus.INTERNAL_SERVER_ERROR,
-      "Payment creation failed."
-    );
-  }
-  const updatedBooking = await Booking.findByIdAndUpdate(
-    booking._id,
-    {
-      payment: payment._id,
-    },
-    {
-      new: true,
-      runValidators: true,
+    if (!user?.phone || !user?.address) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        "Please update your profile with phone and address."
+      );
     }
-  )
-    .populate("user", "name email phone address")
-    .populate("tour", "title costFrom maxGuest")
-    .populate("payment", "transactionId amount status");
 
-  if (!updatedBooking) {
-    throw new AppError(
-      httpStatus.INTERNAL_SERVER_ERROR,
-      "Booking update failed."
+    if (!payload.tour) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Tour ID is required.");
+    }
+
+    if (!payload.guestCount) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "Guest count must be at least 1."
+      );
+    }
+
+    //  Make Booking
+    const booking = await Booking.create(
+      [
+        {
+          ...payload,
+          user: user._id,
+        },
+      ],
+      { session }
     );
-  }
 
-  return {
-    booking: updatedBooking,
-  };
+    const tourData = await Tour.findById(payload.tour).session(session);
+
+    if (!tourData || !tourData?.costFrom || !tourData?.maxGuest) {
+      throw new AppError(httpStatus.NOT_FOUND, "Something missing about tour.");
+    }
+
+    if (payload.guestCount <= 0) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "Guest count must be at least 1."
+      );
+    }
+
+    if (payload.guestCount > tourData?.maxGuest) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        `Guest count exceeds maximum group size of ${tourData.maxGuest}.`
+      );
+    }
+
+    // Make Payment
+    const payment = await Payment.create(
+      [
+        {
+          user: user._id,
+          booking: booking[0]._id,
+          transactionId: `txn_${Date.now()}_${Math.floor(
+            Math.random() * 1000
+          )}`,
+          amount: payload.guestCount * tourData?.costFrom,
+        },
+      ],
+      { session }
+    );
+
+    if (!payment) {
+      throw new AppError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Payment creation failed."
+      );
+    }
+
+    // Update Booking with Payment
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      booking[0]._id,
+      {
+        payment: payment[0]._id,
+      },
+      {
+        session,
+        new: true,
+        runValidators: true,
+      }
+    )
+      .populate("user", "name email phone address")
+      .populate("tour", "title costFrom maxGuest")
+      .populate("payment", "transactionId amount status");
+
+    if (!updatedBooking) {
+      throw new AppError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Booking update failed."
+      );
+    }
+    await session.commitTransaction();
+    session.endSession();
+    return {
+      booking: updatedBooking,
+    };
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
 };
 
 const getAllBookings = async () => {

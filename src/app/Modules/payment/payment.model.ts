@@ -11,6 +11,7 @@ const paymentSchema = new Schema<IPayment>(
       type: Schema.Types.ObjectId,
       ref: "Booking",
       unique: true,
+      required: true,
     },
     transactionId: {
       type: String,
