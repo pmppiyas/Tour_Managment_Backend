@@ -1,3 +1,4 @@
+import { JwtPayload } from "jsonwebtoken";
 import catchAsync from "../../utils/catchAsync";
 import { Request, Response, NextFunction } from "express";
 import sendResponse from "../../utils/sendResponse";
@@ -5,7 +6,9 @@ import { BookingServices } from "./booking.services";
 
 const createBooking = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await BookingServices.createBooking(req.body);
+    const decodedToken = req.user as JwtPayload;
+
+    const result = await BookingServices.createBooking(req.body, decodedToken);
 
     sendResponse(res, {
       statusCode: 201,
@@ -18,7 +21,7 @@ const createBooking = catchAsync(
 
 const getAllBooking = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await BookingServices.createBooking(req.body);
+    const result = await BookingServices.getAllBookings();
 
     sendResponse(res, {
       statusCode: 201,
@@ -31,7 +34,7 @@ const getAllBooking = catchAsync(
 
 const getSingleBooking = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await BookingServices.getAllBookings();
+    const result = await BookingServices.getSingleBooking(req.params.bookingId);
 
     sendResponse(res, {
       statusCode: 200,
@@ -44,7 +47,7 @@ const getSingleBooking = catchAsync(
 
 const getMyBooking = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await BookingServices.getSingleBooking(req.user.id);
+    const result = await BookingServices.getMyBooking();
 
     sendResponse(res, {
       statusCode: 200,
@@ -57,7 +60,10 @@ const getMyBooking = catchAsync(
 
 const updateBooking = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await BookingServices.getMyBooking(req.params.bookingId);
+    const result = await BookingServices.updateBooking(
+      req.params.bookingId,
+      req.params.status
+    );
 
     sendResponse(res, {
       statusCode: 200,

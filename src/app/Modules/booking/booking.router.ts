@@ -2,12 +2,15 @@ import { Router } from "express";
 import { BookingController } from "./booking.controller";
 import { checkAuth } from "../../Middlewares/checkAuth";
 import { Role } from "../user/user.interface";
+import { validateRequest } from "../../Middlewares/validateRequest";
+import { BookingValidation } from "./booking.validation";
 
 const router = Router();
 
 router.post(
-  "/create",
+  "/",
   checkAuth(...Object.values(Role)),
+  validateRequest(BookingValidation.createBookingValidation),
   BookingController.createBooking
 );
 
@@ -29,5 +32,11 @@ router.get(
   BookingController.getSingleBooking
 );
 
-router.patch("/:bookingId/:status", BookingController.updateBooking);
+router.patch(
+  "/:bookingId/:status",
+  checkAuth(...Object.values(Role)),
+  validateRequest(BookingValidation.updateBookingValidation),
+  BookingController.updateBooking
+);
+
 export const BookingRoutes = router;

@@ -16,7 +16,7 @@ const bookingSchema = new Schema<IBooking>(
       ref: "Payment",
       default: null,
     },
-    geustCount: {
+    guestCount: {
       type: Number,
       required: true,
     },
