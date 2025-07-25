@@ -116,7 +116,6 @@ const createBooking = async (payload: IBooking, decodedUser: JwtPayload) => {
       phone: user.phone,
       address: user.address,
     });
-    console.log("SSL Payment Response:", sslPayment);
     await session.commitTransaction();
     session.endSession();
     return {
