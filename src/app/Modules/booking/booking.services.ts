@@ -6,6 +6,7 @@ import httpStatus from "http-status-codes";
 import Booking from "./booking.model";
 import Payment from "../payment/payment.model";
 import { Tour } from "../tour/tour.model";
+import { SslServices } from "../sslCommerz/ssl.services";
 const createBooking = async (payload: IBooking, decodedUser: JwtPayload) => {
   const session = await Booking.startSession();
   session.startTransaction();
@@ -105,10 +106,22 @@ const createBooking = async (payload: IBooking, decodedUser: JwtPayload) => {
         "Booking update failed."
       );
     }
+
+    // SSL PAYMENT INIT
+    const sslPayment = await SslServices.sslPaymentInit({
+      name: user.name,
+      email: user.email,
+      amount: payment[0].amount,
+      transactionId: payment[0].transactionId,
+      phone: user.phone,
+      address: user.address,
+    });
+    console.log("SSL Payment Response:", sslPayment);
     await session.commitTransaction();
     session.endSession();
     return {
       booking: updatedBooking,
+      paymentUrl: sslPayment.GatewayPageURL,
     };
   } catch (err) {
     await session.abortTransaction();

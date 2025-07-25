@@ -113,7 +113,7 @@ const googleCallback = catchAsync(
 
     setAuthCookie(res, tokenInfo);
 
-    res.redirect(`${envVars.FRONTENT_URL}/${redirectTo}`);
+    res.redirect(`${envVars.BACKENT_URL}/${redirectTo}`);
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
