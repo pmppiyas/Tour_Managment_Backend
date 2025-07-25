@@ -3,7 +3,7 @@ import Booking from "../booking/booking.model";
 import { PaymentStatus } from "./payment.interface";
 import Payment from "./payment.model";
 
-const successPayment = async (query: any) => {
+const successPayment = async (query: Record<string, string>) => {
   const session = await Booking.startSession();
   session.startTransaction();
 
@@ -21,7 +21,6 @@ const successPayment = async (query: any) => {
         runValidators: true,
       }
     );
-    console.log("Payment Update:", paymentUpdate);
 
     if (!paymentUpdate?.booking) {
       throw new Error("Payment not linked to booking.");
@@ -47,20 +46,105 @@ const successPayment = async (query: any) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("Transaction failed:", error);
-    return;
+    throw error;
   }
 };
 
-const failPayment = async (req, res) => {
-  // Update booking status to failed
-  // Update payment status to failed
+const failPayment = async (query: Record<string, string>) => {
+  const session = await Booking.startSession();
+  session.startTransaction();
+
+  try {
+    const transactionId = query.tran_id;
+
+    const paymentUpdate = await Payment.findOneAndUpdate(
+      {
+        transactionId,
+      },
+      { status: PaymentStatus.FAILED },
+      {
+        session,
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!paymentUpdate?.booking) {
+      throw new Error("Payment not linked to booking.");
+    }
+
+    await Booking.findByIdAndUpdate(
+      paymentUpdate.booking,
+      { status: BookingStatus.FAILED },
+      {
+        session,
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return {
+      success: false,
+      message: "Payment and booking  is failed.",
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };
-const cancelPayment = async (req, res) => {
-  // Update booking status to cancelled
-  // Update payment status to cancelled
+const cancelPayment = async (query: Record<string, string>) => {
+  const session = await Booking.startSession();
+  session.startTransaction();
+
+  try {
+    const transactionId = query.tran_id;
+
+    const paymentUpdate = await Payment.findOneAndUpdate(
+      {
+        transactionId,
+      },
+      { status: PaymentStatus.CENCELLED },
+      {
+        session,
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!paymentUpdate?.booking) {
+      throw new Error("Payment not linked to booking.");
+    }
+
+    await Booking.findByIdAndUpdate(
+      paymentUpdate.booking,
+      { status: BookingStatus.CANCELLED },
+      {
+        session,
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return {
+      success: false,
+      message: "Payment and booking  is cancel.",
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };
 
 export const PaymentServices = {
   successPayment,
+  failPayment,
+  cancelPayment,
 };
