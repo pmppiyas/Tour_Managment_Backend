@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>OTP যাচাইকরণ</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f3f4f6;
+      padding: 20px;
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .otp-box {
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 4px;
+      background-color: #f0f9ff;
+      padding: 15px 25px;
+      border-radius: 6px;
+      text-align: center;
+      color: #0c4a6e;
+      margin: 20px 0;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #6b7280;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>হ্যালো <%= name %>,</h2>
+    <p>আপনার অ্যাকাউন্ট যাচাই করার জন্য নিচের OTP কোডটি ব্যবহার করুন:</p>
+
+    <div class="otp-box">
+      <%= otp %>
+    </div>
+
+    <p>এই কোডটি ২ মিনিটের জন্য বৈধ। দয়া করে সময়ের মধ্যে কোডটি ব্যবহার করুন।</p>
+
+    <p>যদি আপনি এই অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন।</p>
+
+    <div class="footer">
+      <p>© 2025 Tour Management । All rights reserved</p>
+    </div>
+  </div>
+</body>
+
+</html>
