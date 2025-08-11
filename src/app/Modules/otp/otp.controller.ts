@@ -4,7 +4,7 @@ import sendResponse from "../../utils/sendResponse";
 import { OtpServices } from "./otp.services";
 
 const sendOtp = catchAsync(async (req: Request, res: Response) => {
-  const result = await OtpServices.sendOtp(req.body);
+  await OtpServices.sendOtp(req.body);
 
   sendResponse(res, {
     statusCode: 201,
@@ -15,7 +15,7 @@ const sendOtp = catchAsync(async (req: Request, res: Response) => {
 });
 
 const verifyOtp = catchAsync(async (req: Request, res: Response) => {
-  const result = await OtpServices.verifyOtp();
+  await OtpServices.verifyOtp(req.body);
 
   sendResponse(res, {
     statusCode: 201,
