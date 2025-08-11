@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 import { IAuthProviders, IsActive, IUser, Role } from "./user.interface";
 
 const AuthSchema = new Schema<IAuthProviders>(
@@ -17,7 +17,8 @@ const AuthSchema = new Schema<IAuthProviders>(
 
 const userSchema = new Schema<IUser>(
   {
-    _id: { type: Schema.Types.ObjectId },
+    _id: { type: Schema.Types.ObjectId, default: () => new Types.ObjectId() },
+
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: String,
