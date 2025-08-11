@@ -4,7 +4,6 @@ import { createNewAccessTokenWithRefreshToken } from "./../../utils/userTokens";
 import httpStatus from "http-status-codes";
 import { AppError } from "../../Error/appError";
 import User from "../user/user.model";
-import bcryptjs from "bcryptjs";
 import httpsStatus from "http-status-codes";
 import { hashingPassword } from "../../utils/hashingPassword";
 import { IsActive } from "../user/user.interface";
