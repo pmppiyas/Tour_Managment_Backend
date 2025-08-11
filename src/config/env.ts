@@ -17,6 +17,7 @@ interface EnvConfig {
   GOOGLE_CALLBACK_URL: string;
   EXPRESS_SESSION_SECRET: string;
   BACKENT_URL: string;
+  FRONTEND_URL: string;
   SSL: {
     SSL_STORE_ID: string;
     SSL_STORE_PASSWORD: string;
@@ -28,6 +29,13 @@ interface EnvConfig {
     SSL_SUCCESS_FRONTEND_URL: string;
     SSL_FAIL_FRONTEND_URL: string;
     SSL_CANCEL_FRONTEND_URL: string;
+  };
+  EMAIL_SENDER: {
+    SMTP_USER: string;
+    SMTP_HOST: string;
+    SMTP_PORT: string;
+    SMTP_PASS: string;
+    SMTP_FROM: string;
   };
 }
 
@@ -58,6 +66,12 @@ const loadEnvVars = (): EnvConfig => {
     "SSL_SUCCESS_FRONTEND_URL",
     "SSL_FAIL_FRONTEND_URL",
     "SSL_CANCEL_FRONTEND_URL",
+    "SMTP_PASS",
+    "SMTP_HOST",
+    "SMTP_FROM",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "FRONTEND_URL",
   ];
   requiredEnvVars.forEach((key) => {
     if (!process.env[key]) {
@@ -80,6 +94,7 @@ const loadEnvVars = (): EnvConfig => {
     GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
     EXPRESS_SESSION_SECRET: process.env.EXPRESS_SESSION_SECRET as string,
     BACKENT_URL: process.env.BACKENT_URL as string,
+    FRONTEND_URL: process.env.FRONTEND_URL as string,
     SSL: {
       SSL_STORE_ID: process.env.SSL_STORE_ID as string,
       SSL_STORE_PASSWORD: process.env.SSL_STORE_PASSWORD as string,
@@ -91,6 +106,13 @@ const loadEnvVars = (): EnvConfig => {
       SSL_SUCCESS_FRONTEND_URL: process.env.SSL_SUCCESS_FRONTEND_URL as string,
       SSL_FAIL_FRONTEND_URL: process.env.SSL_FAIL_FRONTEND_URL as string,
       SSL_CANCEL_FRONTEND_URL: process.env.SSL_CANCEL_FRONTEND_URL as string,
+    },
+    EMAIL_SENDER: {
+      SMTP_FROM: process.env.SMTP_FROM as string,
+      SMTP_HOST: process.env.SMTP_HOST as string,
+      SMTP_PASS: process.env.SMTP_PASS as string,
+      SMTP_PORT: process.env.SMTP as string,
+      SMTP_USER: process.env.SMTP_USER as string,
     },
   };
 };

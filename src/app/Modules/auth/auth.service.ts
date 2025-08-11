@@ -1,40 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { JwtPayload } from "jsonwebtoken";
 import { createNewAccessTokenWithRefreshToken } from "./../../utils/userTokens";
 import httpStatus from "http-status-codes";
 import { AppError } from "../../Error/appError";
 import User from "../user/user.model";
 import bcryptjs from "bcryptjs";
-
+import httpsStatus from "http-status-codes";
 import { hashingPassword } from "../../utils/hashingPassword";
-
-// const credentialsLogin = async (payload: Partial<IUser>) => {
-//   const { email, password } = payload;
-
-//   const IsUserExist = await User.findOne({ email });
-//   if (!IsUserExist) {
-//     throw new AppError(httpStatus.BAD_REQUEST, "User does not exist");
-//   }
-
-//   const IsPasswordMatch = await bcryptjs.compare(
-//     password as string,
-//     IsUserExist.password as string
-//   );
-
-//   if (!IsPasswordMatch) {
-//     throw new AppError(httpStatus.BAD_REQUEST, "Incorrect Password");
-//   }
-
-//   const userTokens = createUserTokens(IsUserExist);
-//   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//   const { password: _password, ...userWithoutPassword } =
-//     IsUserExist.toObject();
-
-//   return {
-//     accessToken: userTokens.accessToken,
-//     refreshToken: userTokens.refreshToken,
-//     user: userWithoutPassword,
-//   };
-// };
+import { IsActive } from "../user/user.interface";
+import jwt from "jsonwebtoken";
+import { envVars } from "../../../config/env";
+import { sendEmail } from "../../utils/sendEmail";
 
 const getNewAccessToken = async (refreshToken: string) => {
   const newAccessToken = await createNewAccessTokenWithRefreshToken(
@@ -44,35 +20,86 @@ const getNewAccessToken = async (refreshToken: string) => {
   return newAccessToken;
 };
 
+const forgetPassword = async (email: string) => {
+  console.log(email);
+
+  const isUserExist = await User.findOne({ email });
+
+  if (!isUserExist) {
+    throw new AppError(httpsStatus.BAD_REQUEST, "User does not exist");
+  }
+
+  if (
+    isUserExist.isActive === IsActive.BLOCK ||
+    isUserExist.isActive === IsActive.INACTIVE
+  ) {
+    throw new AppError(
+      httpsStatus.BAD_REQUEST,
+      `User is ${isUserExist.isActive}`
+    );
+  }
+
+  if (isUserExist.isDeleted) {
+    throw new AppError(httpsStatus.BAD_REQUEST, "User is deleted");
+  }
+
+  const JwtPayload = {
+    userId: isUserExist._id,
+    email: isUserExist.email,
+    role: isUserExist.role,
+  };
+
+  const resetToken = jwt.sign(JwtPayload, envVars.JWT_ACCESS_TOKEN, {
+    expiresIn: "10m",
+  });
+
+  const resetUILink = `${envVars.FRONTEND_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`;
+
+  sendEmail({
+    to: isUserExist.email,
+    subject: "Password Reset",
+    templateName: "forgetPassword",
+    templateData: {
+      name: isUserExist.name,
+      resetUILink,
+    },
+  });
+};
+
 const resetPassword = async (
-  oldPassword: string,
-  newPassword: string,
+  payload: Record<string, any>,
   decodedToken: JwtPayload
 ): Promise<boolean> => {
-  const user = await User.findById(decodedToken.userId);
-
-  if (!user || !user.password) {
+  if (!payload.id) {
+    throw new AppError(httpStatus.NOT_FOUND, "Paylod userId not found!");
+  }
+  if (!payload.email) {
+    throw new AppError(httpStatus.NOT_FOUND, "Paylod email not found!");
+  }
+  if (!payload.newInputPassword) {
     throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "User not found or password missing"
+      httpStatus.NOT_FOUND,
+      "Paylod newInputPassword not found!"
+    );
+  }
+  if (payload.id !== decodedToken.userId) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You cannot reset other's password."
     );
   }
 
-  if (oldPassword === newPassword) {
-    throw new AppError(
-      httpStatus.METHOD_FAILURE,
-      "Please give defferent new password"
-    );
-  }
-  const isOldPasswordMatch = await bcryptjs.compare(oldPassword, user.password);
+  const isUserExist = await User.findById(decodedToken.userId);
 
-  if (!isOldPasswordMatch) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Incorrect old password");
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "User does not exist.");
   }
 
-  user.password = await hashingPassword(newPassword);
+  const hashedPassword = await hashingPassword(payload.newInputPassword);
 
-  await user.save();
+  isUserExist.password = hashedPassword;
+
+  await isUserExist.save();
 
   return true;
 };
@@ -80,4 +107,5 @@ const resetPassword = async (
 export const AuthServices = {
   getNewAccessToken,
   resetPassword,
+  forgetPassword,
 };

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import passport from "passport";
 import { JwtPayload } from "jsonwebtoken";
@@ -73,17 +74,24 @@ const logout = catchAsync(
   }
 );
 
+const forgetPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email, id } = req.body;
+    await AuthServices.forgetPassword(email);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Reset email send successfully.",
+      data: null,
+    });
+  }
+);
+
 const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const oldPassword = req.body.oldPassword;
-    const newInputPassword = req.body.newPassword;
     const decodedToken = req.user;
 
-    await AuthServices.resetPassword(
-      oldPassword,
-      newInputPassword,
-      decodedToken as JwtPayload
-    );
+    await AuthServices.resetPassword(req.body, decodedToken as JwtPayload);
 
     sendResponse(res, {
       success: true,
@@ -128,5 +136,6 @@ export const AuthControllers = {
   getNewAccessToken,
   logout,
   resetPassword,
+  forgetPassword,
   googleCallback,
 };
